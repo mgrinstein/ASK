@@ -22,7 +22,50 @@ The project is designed to be extensible, allowing the addition of new data sour
 - Analogue space missions  
 - Field robotics and remote operations  
 - Scientific experiments in isolated environments  
-- Sensor and instrumentation data gathering  
+- Sensor and instrumentation data gathering
+
+## Architecture (initial concept)
+```mermaid
+flowchart TD
+    %% Local Side
+    subgraph Local["Local / Field"]
+        COL[Telemetry Collector]
+        BUF[Local Storage]
+        API[Local API]
+        UI[Operator Dashboard]
+        
+        COL --> BUF
+        BUF --> API
+        API --> UI
+    end
+
+    %% Sync Layer
+    subgraph Sync["Sync Layer"]
+        SYNC[Sync Agent]
+        BUF --> SYNC
+    end
+
+    %% Cloud Side
+    subgraph Cloud["Remote / Cloud"]
+        STORAGE[Data Storage]
+        METADATA[Metadata Store]
+        PROCESSING[Data Processing]
+        PIPELINE[Batch Pipeline]
+        DASHBOARD[Remote Dashboard]
+        
+        SYNC --> STORAGE
+        SYNC --> METADATA
+        STORAGE --> PROCESSING
+        METADATA --> PROCESSING
+        PROCESSING --> PIPELINE
+        PIPELINE --> DASHBOARD
+    end
+
+    %% Optional feedback
+    DASHBOARD -->|Monitoring Analytics| UI
+
+
+```
 
 ## Project Structure (initial concept)
 
