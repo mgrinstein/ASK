@@ -347,6 +347,9 @@ components:
     SyncStatus:
       type: object
       additionalProperties: false
+      description: >
+        `lastRun` is optional and omitted when the sync agent has not attempted
+        a run yet.
       required: [state, connectivity, queuedRecordCount]
       properties:
         state:
@@ -390,6 +393,10 @@ components:
         - $ref: "#/components/schemas/SyncRunFailed"
       discriminator:
         propertyName: outcome
+        mapping:
+          success: "#/components/schemas/SyncRunSuccess"
+          partial: "#/components/schemas/SyncRunPartial"
+          failed: "#/components/schemas/SyncRunFailed"
 
     SyncRunSuccess:
       type: object
