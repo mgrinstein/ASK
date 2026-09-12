@@ -58,8 +58,8 @@ paths:
             schema:
               $ref: "#/components/schemas/TelemetryIngestRequest"
       responses:
-        "202":
-          description: Accepted for buffering
+        "201":
+          description: Buffered successfully
           content:
             application/json:
               schema:
@@ -345,7 +345,7 @@ components:
     SyncStatus:
       type: object
       additionalProperties: false
-      required: [state, connectivity, lastOutcome, queuedRecordCount]
+      required: [state, connectivity, queuedRecordCount]
       properties:
         state:
           type: string
@@ -353,32 +353,53 @@ components:
         connectivity:
           type: string
           enum: [online, offline, degraded]
-        lastOutcome:
-          type: string
-          enum: [none, success, partial, failed]
         queuedRecordCount:
           type: integer
           minimum: 0
-        lastAttemptAt:
-          type: string
-          format: date-time
+        lastRun:
           nullable: true
-        lastSuccessAt:
-          type: string
-          format: date-time
-          nullable: true
-        lastError:
-          type: string
-          nullable: true
+          description: >
+            Null when no sync attempt has occurred yet. Otherwise contains the
+            most recent attempt details and outcome.
+          allOf:
+            - $ref: "#/components/schemas/SyncRunSummary"
 
     SyncTriggerAccepted:
       type: object
       additionalProperties: false
-      required: [accepted, requestedAt]
+      required: [accepted, requestId, requestedAt, statusUrl]
       properties:
         accepted:
           type: boolean
           example: true
+        requestId:
+          type: string
+          format: uuid
         requestedAt:
           type: string
           format: date-time
+        statusUrl:
+          type: string
+          format: uri
+          example: /v1/sync/status
+
+    SyncRunSummary:
+      type: object
+      additionalProperties: false
+      required: [outcome, attemptedAt]
+      properties:
+        outcome:
+          type: string
+          enum: [success, partial, failed]
+        attemptedAt:
+          type: string
+          format: date-time
+        successfulAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Present only when outcome is success or partial.
+        errorMessage:
+          type: string
+          nullable: true
+          description: Present only when outcome is failed or partial.
