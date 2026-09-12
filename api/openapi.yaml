@@ -208,6 +208,7 @@ components:
 
     TelemetryRecord:
       type: object
+      additionalProperties: false
       required: [id, sourceId, recordedAt, receivedAt, payload]
       properties:
         id:
@@ -250,6 +251,7 @@ components:
 
     TelemetryRecordInput:
       type: object
+      additionalProperties: false
       required: [sourceId, recordedAt, payload]
       properties:
         sourceId:
@@ -294,6 +296,7 @@ components:
 
     TelemetrySource:
       type: object
+      additionalProperties: false
       required: [id, status]
       properties:
         id:
@@ -310,6 +313,7 @@ components:
 
     StorageStatus:
       type: object
+      additionalProperties: false
       required: [bufferedRecordCount, disk]
       properties:
         bufferedRecordCount:
@@ -325,6 +329,7 @@ components:
           nullable: true
         disk:
           type: object
+          additionalProperties: false
           required: [usedBytes, freeBytes]
           properties:
             usedBytes:
@@ -338,6 +343,7 @@ components:
 
     SyncStatus:
       type: object
+      additionalProperties: false
       required: [state, connectivity, lastOutcome, queuedRecordCount]
       properties:
         state:
