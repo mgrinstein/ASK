@@ -137,15 +137,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [accepted, requestedAt]
-                properties:
-                  accepted:
-                    type: boolean
-                    example: true
-                  requestedAt:
-                    type: string
-                    format: date-time
+                $ref: "#/components/schemas/SyncTriggerAccepted"
 
 components:
   parameters:
@@ -185,6 +177,7 @@ components:
   schemas:
     HealthStatus:
       type: object
+      additionalProperties: false
       required: [status, service, version, timestamp]
       properties:
         status:
@@ -235,6 +228,7 @@ components:
 
     TelemetryIngestRequest:
       type: object
+      additionalProperties: false
       required: [records]
       properties:
         records:
@@ -278,6 +272,7 @@ components:
 
     TelemetryListResponse:
       type: object
+      additionalProperties: false
       required: [items]
       properties:
         items:
@@ -373,3 +368,15 @@ components:
         lastError:
           type: string
           nullable: true
+
+    SyncTriggerAccepted:
+      type: object
+      additionalProperties: false
+      required: [accepted, requestedAt]
+      properties:
+        accepted:
+          type: boolean
+          example: true
+        requestedAt:
+          type: string
+          format: date-time
