@@ -309,7 +309,7 @@ components:
 
     StorageStatus:
       type: object
-      required: [bufferedRecordCount, oldestRecordAt, disk]
+      required: [bufferedRecordCount, disk]
       properties:
         bufferedRecordCount:
           type: integer
@@ -341,7 +341,13 @@ components:
       properties:
         state:
           type: string
-          enum: [idle, syncing, offline, error]
+          enum: [idle, syncing]
+        connectivity:
+          type: string
+          enum: [online, offline, degraded]
+        lastOutcome:
+          type: string
+          enum: [none, success, partial, failed]
         queuedRecordCount:
           type: integer
           minimum: 0
