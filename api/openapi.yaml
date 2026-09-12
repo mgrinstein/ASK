@@ -391,12 +391,6 @@ components:
         - $ref: "#/components/schemas/SyncRunSuccess"
         - $ref: "#/components/schemas/SyncRunPartial"
         - $ref: "#/components/schemas/SyncRunFailed"
-      discriminator:
-        propertyName: outcome
-        mapping:
-          success: "#/components/schemas/SyncRunSuccess"
-          partial: "#/components/schemas/SyncRunPartial"
-          failed: "#/components/schemas/SyncRunFailed"
 
     SyncRunSuccess:
       type: object
