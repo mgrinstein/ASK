@@ -12,6 +12,7 @@ servers:
 tags:
   - name: system
   - name: telemetry
+  - name: sources
   - name: storage
   - name: sync
 paths:
@@ -89,7 +90,7 @@ paths:
 
   /v1/sources:
     get:
-      tags: [telemetry]
+      tags: [sources]
       summary: List registered telemetry sources
       operationId: listSources
       responses:
@@ -261,6 +262,7 @@ components:
 
     IngestAccepted:
       type: object
+      additionalProperties: false
       required: [accepted, queuedRecords]
       properties:
         accepted:
