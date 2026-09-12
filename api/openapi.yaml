@@ -66,6 +66,10 @@ paths:
                 $ref: "#/components/schemas/IngestAccepted"
         "400":
           description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
 
   /v1/telemetry/{recordId}:
     get:
@@ -399,3 +403,28 @@ components:
           type: string
           nullable: true
           description: Present only when outcome is failed or partial.
+
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: validation_error
+        message:
+          type: string
+          example: One or more records are invalid.
+        details:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [field, issue]
+            properties:
+              field:
+                type: string
+                example: records[0].recordedAt
+              issue:
+                type: string
+                example: must be a valid RFC3339 timestamp
