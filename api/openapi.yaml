@@ -1,0 +1,464 @@
+openapi: 3.0.3
+info:
+  title: ASK Local API
+  version: 0.1.0
+  description: >
+    Initial Local API specification for Analogue Sync Kit (ASK). This API
+    supports local telemetry access, operator visibility, and sync observability
+    in offline-first field environments.
+servers:
+  - url: http://localhost:8080
+    description: Local field node
+tags:
+  - name: system
+  - name: telemetry
+  - name: sources
+  - name: storage
+  - name: sync
+paths:
+  /health:
+    get:
+      tags: [system]
+      summary: Liveness and readiness check
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /v1/telemetry:
+    get:
+      tags: [telemetry]
+      summary: List buffered telemetry records
+      operationId: listTelemetry
+      parameters:
+        - $ref: "#/components/parameters/startTime"
+        - $ref: "#/components/parameters/endTime"
+        - $ref: "#/components/parameters/sourceId"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/cursor"
+      responses:
+        "200":
+          description: Buffered telemetry records
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryListResponse"
+    post:
+      tags: [telemetry]
+      summary: Ingest telemetry from local collectors
+      operationId: ingestTelemetry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryIngestRequest"
+      responses:
+        "201":
+          description: Buffered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestAccepted"
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /v1/telemetry/{recordId}:
+    get:
+      tags: [telemetry]
+      summary: Fetch one telemetry record
+      operationId: getTelemetryRecord
+      parameters:
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Telemetry record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryRecord"
+        "404":
+          description: Record not found
+
+  /v1/sources:
+    get:
+      tags: [sources]
+      summary: List registered telemetry sources
+      operationId: listSources
+      responses:
+        "200":
+          description: Source catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetrySourceListResponse"
+
+  /v1/storage/status:
+    get:
+      tags: [storage]
+      summary: Local buffer and storage metrics
+      operationId: getStorageStatus
+      responses:
+        "200":
+          description: Storage status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageStatus"
+
+  /v1/sync/status:
+    get:
+      tags: [sync]
+      summary: Sync agent status and backlog
+      operationId: getSyncStatus
+      responses:
+        "200":
+          description: Sync status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncStatus"
+
+  /v1/sync/trigger:
+    post:
+      tags: [sync]
+      summary: Request an immediate sync attempt
+      operationId: triggerSync
+      responses:
+        "202":
+          description: Sync request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncTriggerAccepted"
+
+components:
+  parameters:
+    startTime:
+      name: start
+      in: query
+      description: Inclusive lower bound in UTC
+      schema:
+        type: string
+        format: date-time
+    endTime:
+      name: end
+      in: query
+      description: Inclusive upper bound in UTC
+      schema:
+        type: string
+        format: date-time
+    sourceId:
+      name: sourceId
+      in: query
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+    cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+
+  schemas:
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status, service, version, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        service:
+          type: string
+          example: ask-local-api
+        version:
+          type: string
+          example: 0.1.0
+        timestamp:
+          type: string
+          format: date-time
+
+    TelemetryRecord:
+      type: object
+      additionalProperties: false
+      required: [id, sourceId, recordedAt, receivedAt, payload]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Server-assigned identifier generated before persistence/query
+        sourceId:
+          type: string
+          example: suit-biomed-01
+        missionId:
+          type: string
+          example: analog-eva-2026-01
+        type:
+          type: string
+          example: biosignal
+        recordedAt:
+          type: string
+          format: date-time
+        receivedAt:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Source-specific telemetry payload
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+
+    TelemetryIngestRequest:
+      type: object
+      additionalProperties: false
+      required: [records]
+      properties:
+        records:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/TelemetryRecordInput"
+
+    TelemetryRecordInput:
+      type: object
+      additionalProperties: false
+      required: [sourceId, recordedAt, payload]
+      properties:
+        sourceId:
+          type: string
+        missionId:
+          type: string
+        type:
+          type: string
+        recordedAt:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+
+    IngestAccepted:
+      type: object
+      additionalProperties: false
+      required: [accepted, queuedRecords]
+      properties:
+        accepted:
+          type: boolean
+          example: true
+        queuedRecords:
+          type: integer
+          minimum: 0
+
+    TelemetryListResponse:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TelemetryRecord"
+        nextCursor:
+          type: string
+          nullable: true
+
+    TelemetrySource:
+      type: object
+      additionalProperties: false
+      required: [id, status]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        status:
+          type: string
+          enum: [online, degraded, offline]
+        lastSeenAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    TelemetrySourceListResponse:
+      type: object
+      additionalProperties: false
+      required: [sources]
+      properties:
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/TelemetrySource"
+
+    StorageStatus:
+      type: object
+      additionalProperties: false
+      required: [bufferedRecordCount, disk]
+      properties:
+        bufferedRecordCount:
+          type: integer
+          minimum: 0
+        oldestRecordAt:
+          type: string
+          format: date-time
+          nullable: true
+        newestRecordAt:
+          type: string
+          format: date-time
+          nullable: true
+        disk:
+          type: object
+          additionalProperties: false
+          required: [usedBytes, freeBytes]
+          properties:
+            usedBytes:
+              type: integer
+              format: int64
+              minimum: 0
+            freeBytes:
+              type: integer
+              format: int64
+              minimum: 0
+
+    SyncStatus:
+      type: object
+      additionalProperties: false
+      description: >
+        `lastRun` is optional and omitted when the sync agent has not attempted
+        a run yet.
+      required: [state, connectivity, queuedRecordCount]
+      properties:
+        state:
+          type: string
+          enum: [idle, syncing]
+        connectivity:
+          type: string
+          enum: [online, offline, degraded]
+        queuedRecordCount:
+          type: integer
+          minimum: 0
+        lastRun:
+          description: >
+            Omitted until at least one sync attempt has occurred; when present,
+            contains the most recent attempt details and outcome.
+          $ref: "#/components/schemas/SyncRunSummary"
+
+    SyncTriggerAccepted:
+      type: object
+      additionalProperties: false
+      required: [accepted, requestId, requestedAt, statusPath]
+      properties:
+        accepted:
+          type: boolean
+          example: true
+        requestId:
+          type: string
+          format: uuid
+        requestedAt:
+          type: string
+          format: date-time
+        statusPath:
+          type: string
+          pattern: "^/.*"
+          example: /v1/sync/status
+
+    SyncRunSummary:
+      oneOf:
+        - $ref: "#/components/schemas/SyncRunSuccess"
+        - $ref: "#/components/schemas/SyncRunPartial"
+        - $ref: "#/components/schemas/SyncRunFailed"
+
+    SyncRunSuccess:
+      type: object
+      additionalProperties: false
+      required: [outcome, attemptedAt, successfulAt]
+      properties:
+        outcome:
+          type: string
+          enum: [success]
+        attemptedAt:
+          type: string
+          format: date-time
+        successfulAt:
+          type: string
+          format: date-time
+
+    SyncRunPartial:
+      type: object
+      additionalProperties: false
+      required: [outcome, attemptedAt, successfulAt, errorMessage]
+      properties:
+        outcome:
+          type: string
+          enum: [partial]
+        attemptedAt:
+          type: string
+          format: date-time
+        successfulAt:
+          type: string
+          format: date-time
+        errorMessage:
+          type: string
+
+    SyncRunFailed:
+      type: object
+      additionalProperties: false
+      required: [outcome, attemptedAt, errorMessage]
+      properties:
+        outcome:
+          type: string
+          enum: [failed]
+        attemptedAt:
+          type: string
+          format: date-time
+        errorMessage:
+          type: string
+
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: validation_error
+        message:
+          type: string
+          example: One or more records are invalid.
+        details:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [field, issue]
+            properties:
+              field:
+                type: string
+                example: records[0].recordedAt
+              issue:
+                type: string
+                example: must be a valid RFC3339 timestamp
