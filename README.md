@@ -76,6 +76,12 @@ flowchart TD
 - `/operator-ui`    : Optional local operator dashboard
 - `/stack`          : Cloud infrastructure
 
+## Local API Spec (initial draft)
+
+An initial OpenAPI/Swagger specification for the Local API is available at:
+
+- `/api/openapi.yaml`
+
 ## Contributing
 
 Issues labeled "good first issue" are suitable entry points for new contributors.  
