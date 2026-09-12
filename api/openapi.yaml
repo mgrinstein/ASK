@@ -224,8 +224,7 @@ components:
           additionalProperties: true
         metadata:
           type: object
-          additionalProperties:
-            type: string
+          additionalProperties: true
 
     TelemetryIngestRequest:
       type: object
@@ -257,8 +256,7 @@ components:
           additionalProperties: true
         metadata:
           type: object
-          additionalProperties:
-            type: string
+          additionalProperties: true
 
     IngestAccepted:
       type: object
@@ -357,12 +355,10 @@ components:
           type: integer
           minimum: 0
         lastRun:
-          nullable: true
           description: >
-            Null when no sync attempt has occurred yet. Otherwise contains the
-            most recent attempt details and outcome.
-          allOf:
-            - $ref: "#/components/schemas/SyncRunSummary"
+            Present only when at least one sync attempt has occurred; contains
+            the most recent attempt details and outcome.
+          $ref: "#/components/schemas/SyncRunSummary"
 
     SyncTriggerAccepted:
       type: object
