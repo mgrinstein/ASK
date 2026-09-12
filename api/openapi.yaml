@@ -356,8 +356,8 @@ components:
           minimum: 0
         lastRun:
           description: >
-            Present only when at least one sync attempt has occurred; contains
-            the most recent attempt details and outcome.
+            Omitted until at least one sync attempt has occurred; when present,
+            contains the most recent attempt details and outcome.
           $ref: "#/components/schemas/SyncRunSummary"
 
     SyncTriggerAccepted:
@@ -376,7 +376,7 @@ components:
           format: date-time
         statusUrl:
           type: string
-          format: uri
+          format: uri-reference
           example: /v1/sync/status
 
     SyncRunSummary:
