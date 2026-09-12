@@ -213,6 +213,7 @@ components:
         id:
           type: string
           format: uuid
+          description: Server-assigned identifier generated before persistence/query
         sourceId:
           type: string
           example: suit-biomed-01
@@ -337,7 +338,7 @@ components:
 
     SyncStatus:
       type: object
-      required: [state, queuedRecordCount]
+      required: [state, connectivity, lastOutcome, queuedRecordCount]
       properties:
         state:
           type: string
