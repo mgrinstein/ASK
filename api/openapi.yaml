@@ -98,13 +98,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [sources]
-                properties:
-                  sources:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/TelemetrySource"
+                $ref: "#/components/schemas/TelemetrySourceListResponse"
 
   /v1/storage/status:
     get:
@@ -310,6 +304,16 @@ components:
           type: string
           format: date-time
           nullable: true
+
+    TelemetrySourceListResponse:
+      type: object
+      additionalProperties: false
+      required: [sources]
+      properties:
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/TelemetrySource"
 
     StorageStatus:
       type: object
