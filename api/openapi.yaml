@@ -367,7 +367,7 @@ components:
     SyncTriggerAccepted:
       type: object
       additionalProperties: false
-      required: [accepted, requestId, requestedAt, statusUrl]
+      required: [accepted, requestId, requestedAt, statusPath]
       properties:
         accepted:
           type: boolean
@@ -378,31 +378,64 @@ components:
         requestedAt:
           type: string
           format: date-time
-        statusUrl:
+        statusPath:
           type: string
-          format: uri-reference
+          pattern: "^/.*"
           example: /v1/sync/status
 
     SyncRunSummary:
+      oneOf:
+        - $ref: "#/components/schemas/SyncRunSuccess"
+        - $ref: "#/components/schemas/SyncRunPartial"
+        - $ref: "#/components/schemas/SyncRunFailed"
+      discriminator:
+        propertyName: outcome
+
+    SyncRunSuccess:
       type: object
       additionalProperties: false
-      required: [outcome, attemptedAt]
+      required: [outcome, attemptedAt, successfulAt]
       properties:
         outcome:
           type: string
-          enum: [success, partial, failed]
+          enum: [success]
         attemptedAt:
           type: string
           format: date-time
         successfulAt:
           type: string
           format: date-time
-          nullable: true
-          description: Present only when outcome is success or partial.
+
+    SyncRunPartial:
+      type: object
+      additionalProperties: false
+      required: [outcome, attemptedAt, successfulAt, errorMessage]
+      properties:
+        outcome:
+          type: string
+          enum: [partial]
+        attemptedAt:
+          type: string
+          format: date-time
+        successfulAt:
+          type: string
+          format: date-time
         errorMessage:
           type: string
-          nullable: true
-          description: Present only when outcome is failed or partial.
+
+    SyncRunFailed:
+      type: object
+      additionalProperties: false
+      required: [outcome, attemptedAt, errorMessage]
+      properties:
+        outcome:
+          type: string
+          enum: [failed]
+        attemptedAt:
+          type: string
+          format: date-time
+        errorMessage:
+          type: string
 
     ValidationErrorResponse:
       type: object
